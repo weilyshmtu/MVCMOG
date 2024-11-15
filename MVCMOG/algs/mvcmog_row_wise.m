@@ -80,7 +80,7 @@ while iter < maxIter
         J11(v) = sum(sum(D_C{v}.*S));
         J22(v) = sum(sum(D_C{v}.*SS));
     end
-     p = J2./(J1+J2);
+    p = J2./(J1+J2);
     q = sum(gamma.^2.*J22)/(sum(gamma.^2.*J11) + sum(gamma.^2.*J22));
 
     % update gamma
@@ -91,7 +91,7 @@ while iter < maxIter
 
     % update OBJ
     obj1 = sum((p.^2).*(J1) + ((1-p).^2).*(J2));
-    obj2 = sum(alpha*gamma.*(q^2*(J11) + (1-q)^2*(J22)));
+    obj2 = sum(alpha*gamma.^2.*(q^2*(J11) + (1-q)^2*(J22)));
     obj3 = beta*sum(sum(D_F.*S));
     obj_current = obj1 + obj2 + obj3;
    
