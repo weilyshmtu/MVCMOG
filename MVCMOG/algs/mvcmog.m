@@ -32,17 +32,9 @@ while iter < maxIter
     % update Cv
     for v = 1 : n_views
         A = alpha*gamma(v)*(q^2*L_S + (1-q)^2*L_SS) - (1-p(v))^2*XXt{v} ;
+        B = p(v)^2*D_X{v};
         initC_v = C{v};
-        for i = 1: n_samples
-            index = 1:n_samples;
-            if cutflag
-                index = find(initC_v(i,:)>0);
-            end
-            b = -p(v)^2*D_X{v}(i,index);
-            [C_v(i, index)] = fun_alm(A(index, index), b,n_samples);
-        end
-        % C{v} = C_v;
-        C{v} = 0.5*(C_v + C_v');
+        [C{v}, obj_t] = fun_alm(A, B, initC_v, cut_flag);
         CC{v} = C{v}*C{v}';
         D_C{v} = EuDist2(C{v}, C{v},2);
     end
@@ -65,6 +57,7 @@ while iter < maxIter
     L_S = diag(sum(S, 2)) - S;
     [F, ~] = eigs(L_S, n_clusters, "smallestreal");
     D_F = EuDist2(F, F, 2);
+    
     % update p
     for v =1:n_views
         J1(v) = sum(sum(D_X{v}.*C{v}));
