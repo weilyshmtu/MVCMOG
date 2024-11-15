@@ -67,7 +67,7 @@ while iter < maxIter
         J22(v) = sum(sum(D_C{v}.*SS));
     end
     p = J2./(J1+J2);
-    q = sum(J22)/(sum(J11) + sum(J22));
+    q = sum(gamma^2.*J22)/(sum(gamma^2.*J11) + sum(gamma^2.*J22));
 
     % update gamma
     J = 1./(J11 + J22);
