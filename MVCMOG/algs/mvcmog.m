@@ -17,6 +17,7 @@ for v = 1: n_views
 end
 L_S = diag(sum(S, 2)) - S;
 SS = S*S;
+L_SS = diag(sum(SS, 2)) - SS;
 
 F = F_init;
 D_F = EuDist2(F, F, 2);
@@ -29,7 +30,7 @@ while iter < maxIter
     iter = iter + 1;
 
     % update Cv
-    L_SS = diag(sum(SS, 2)) - SS;
+    
     
     for v = 1 : n_views
         A = alpha*gamma(v)*(q^2*L_S + (1-q)^2*L_SS) - (1-p(v))^2*XXt{v} ;
@@ -59,7 +60,8 @@ while iter < maxIter
     init_S = S;
     [S, obj_t] = fun_alm(G, N, init_S, cut_flag);
     SS = S*S;
-
+    L_SS = diag(sum(SS, 2)) - SS;
+    
     % update F
     L_S = diag(sum(S, 2)) - S;
     [F, ~] = eigs(L_S, n_clusters, "smallestreal");
