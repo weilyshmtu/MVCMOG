@@ -7,7 +7,7 @@ neighbor_size = opts.neighbor_size;
 cutflag = opts.cutflag;
 
 I = eye(n_samples);
-p = 0.5*ones(1, n_views);
+p = ones(1, n_views)/n;
 q = 0.5;
 gamma = ones(1, n_views)/n_views;
 
@@ -57,15 +57,7 @@ while iter < maxIter
     end
     A = -alpha*(1-q)^2*A;
     init_S = S;
-    for i = 1: n_samples
-        index = 1:n_samples;
-        if cutflag
-            index = find(init_S(i,:)>0);
-        end
-        b = -alpha*q^2*D_C_total(i,index) - beta*D_F(i,index);
-        [S(i, index)] = fun_alm(A(index, index), b,n_samples);
-    end
-    S = 0.5*(S + S');
+    [S, obj_t] = fun_alm(G, N, init_S, cut_flag);
     SS = S*S;
 
     % update F
@@ -111,40 +103,40 @@ end
 end
 
 
-function [v, obj] = fun_alm(A,b, n_samples)
-    if size(b,1) == 1
-        b = b';
-    end
-    
-    % initialize
-    rho = 1.5;
-    mu = max(90);
-    n = size(A,1);
-    alpha = ones(n,1);
-    v = ones(n,1)/n;
-    tol = 1e-5;
+function [S, obj] = fun_alm(G, N, S_pre, cutflag)
 
-    % obj = [v'*A*v-v'*b];
+    rho = 1.5;
+    mu = 30;
+    n = size(G, 1);
+    T = ones(n,n)/n;
+    Q = ones(n, n);
+
     iter = 0;
-    while iter < 30
-        % update z
-        z = v - A'*v/mu + alpha/mu;
-    
-        % update v
-        c = A*z-b;
-        d = alpha/mu-z;
-        mm = d + c/mu;
-        v = EProjSimplex_new(-mm);
-    
-        % update alpha and mu
-        alpha = alpha + mu*(v-z);
-        mu = rho * mu;
+    mIter = 100;
+    obj = 0;
+    while iter < mIter 
+        for i = 1:n
+            if cutflag
+                index = find(S_pre(:,i)>0);
+            else
+                index = 1:n;
+            end
+
+            q = Q(index,i);
+            t_i = T(index,i);
+            n_i = N(index,i);
+            
+            mm_i = (G(index, index)*t_i + n_i)/mu + q/mu - t_i;
+            S(index, i) = EProjSimplex_new(-mm_i);
+        end
+
+        T = S + Q/mu - G'*S/mu;
+        T = (T + T')/2;
+        
+        Q = Q + mu*(S - T);
+        mu = min(rho*mu, 1e30);
         iter = iter + 1;
 
-        % obj = [obj;v'*A*v-v'*b];
-        % if abs(obj(end) - obj(end-1)) < tol
-        %     break;
-        % end
+        obj = [obj;trace(S'*G*S) + sum(sum(N.*S))];
     end
-    v = v';
 end
