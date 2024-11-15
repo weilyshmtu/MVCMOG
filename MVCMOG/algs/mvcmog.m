@@ -56,6 +56,7 @@ while iter < maxIter
     % update F
     L_S = diag(sum(S, 2)) - S;
     [F, ~] = eigs(L_S, n_clusters, "smallestreal");
+    F = real(F);
     D_F = EuDist2(F, F, 2);
     
     % update p
