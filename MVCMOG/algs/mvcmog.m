@@ -70,7 +70,7 @@ while iter < maxIter
     q = sum(gamma^2.*J22)/(sum(gamma^2.*J11) + sum(gamma^2.*J22));
 
     % update gamma
-    J = 1./(J11 + J22);
+    J = 1./(q^2*J11 + (1-q)^2*J22);
     gamma = J./sum(J);
 
     % update OBJ
