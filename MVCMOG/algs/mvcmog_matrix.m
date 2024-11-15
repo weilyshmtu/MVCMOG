@@ -1,4 +1,4 @@
-function [S, C, p, q, obj] = mvcmog_m(XXt, D_X, S_init, F_init, alpha, beta, opts)
+function [S, C, p, q, obj] = mvcmog_matrix(XXt, D_X, S_init, F_init, alpha, beta, opts)
 
 n_views = opts.n_views;
 n_samples = opts.n_samples;
@@ -76,7 +76,7 @@ while iter < maxIter
 
     % update OBJ
     obj1 = sum((p.^2).*(J1) + ((1-p).^2).*(J2));
-    obj2 = sum(alpha*gamma.*(q^2*(J11) + (1-q)^2*(J22)));
+    obj2 = sum(alpha*gamma.^2.*(q^2*(J11) + (1-q)^2*(J22)));
     obj3 = beta*sum(sum(D_F.*S));
     obj_current = obj1 + obj2 + obj3;
     obj(iter) = obj_current;
