@@ -55,7 +55,7 @@ while iter < maxIter
         D_C_total = D_C_total + gamma(v)*D_C{v};
     end
     A = -alpha*(1-q)^2*A;
-    B = -alpha*q^2*D_C_total - beta*D_F;
+    B = alpha*q^2*D_C_total + beta*D_F;
     init_S = S;
     [S, obj_t] = fun_alm(A, B, init_S, cut_flag);
     SS = S*S;
