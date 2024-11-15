@@ -73,8 +73,6 @@ while iter < maxIter
     J = 1./(J11 + J22);
     gamma = J./sum(J);
 
-
-
     % update OBJ
     obj1 = sum((p.^2).*(J1) + ((1-p).^2).*(J2));
     obj2 = sum(alpha*gamma.*(q^2*(J11) + (1-q)^2*(J22)));
@@ -82,15 +80,17 @@ while iter < maxIter
     obj_current = obj1 + obj2 + obj3;
    
     
-    % if iter > 1
-    %     if abs(obj_current - obj(end)) < tol
-    %         break;
-    %     end
-    % end
-
-    obj(iter) = obj_current;
-    if mod(iter, 5) == 0 
-        fprintf("The obj is %d.\n", obj_current)
+    if iter > 1
+        if abs(obj_a - obj(iter - 1)) <  1e-5 && iter > 20
+            break;
+        else
+            obj(iter) = obj_current;
+        end
+    else
+        obj(iter) = obj_current;
+    end
+    if mod(iter, 10) == 0 
+        fprintf("The obj is %d.\n", obj(iter))
     end
 end
 
