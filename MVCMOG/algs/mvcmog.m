@@ -1,4 +1,4 @@
-function [S, C, p, q, obj] = mvcmog(XXt, D_X, S_init, F_init, alpha, beta, opts)
+function [S, C, p, q, obj] = mvcmog_m(XXt, D_X, S_init, F_init, alpha, beta, opts)
 
 n_views = opts.n_views;
 n_samples = opts.n_samples;
@@ -7,7 +7,7 @@ neighbor_size = opts.neighbor_size;
 cutflag = opts.cutflag;
 
 I = eye(n_samples);
-p = ones(1, n_views)/n;
+p = ones(1, n_views)/n_views;
 q = 0.5;
 gamma = ones(1, n_views)/n_views;
 
@@ -34,7 +34,7 @@ while iter < maxIter
         A = alpha*gamma(v)*(q^2*L_S + (1-q)^2*L_SS) - (1-p(v))^2*XXt{v} ;
         B = p(v)^2*D_X{v};
         initC_v = C{v};
-        [C{v}, obj_t] = fun_alm(A, B, initC_v, cut_flag);
+        [C{v}, obj_t] = fun_alm(A, B, initC_v, cutflag);
         CC{v} = C{v}*C{v}';
         D_C{v} = EuDist2(C{v}, C{v},2);
     end
@@ -49,7 +49,7 @@ while iter < maxIter
     A = -alpha*(1-q)^2*A;
     B = alpha*q^2*D_C_total + beta*D_F;
     init_S = S;
-    [S, obj_t] = fun_alm(A, B, init_S, cut_flag);
+    [S, obj_t] = fun_alm(A, B, init_S, cutflag);
     SS = S*S;
     L_SS = diag(sum(SS, 2)) - SS;
     
@@ -67,7 +67,7 @@ while iter < maxIter
         J22(v) = sum(sum(D_C{v}.*SS));
     end
     p = J2./(J1+J2);
-    q = sum(gamma^2.*J22)/(sum(gamma^2.*J11) + sum(gamma^2.*J22));
+    q = sum(gamma.^2.*J22)/(sum(gamma.^2.*J11) + sum(gamma.^2.*J22));
 
     % update gamma
     J = 1./(q^2*J11 + (1-q)^2*J22);
@@ -81,7 +81,7 @@ while iter < maxIter
     obj(iter) = obj_current;
     
     if iter > 1
-        if abs(obj_a - obj(iter - 1)) <  1e-5 && iter > 20
+        if abs(obj_current - obj(iter - 1)) <  1e-5 && iter > 20
             break;
         end
     end
