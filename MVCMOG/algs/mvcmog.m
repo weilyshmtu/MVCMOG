@@ -78,7 +78,7 @@ while iter < maxIter
     obj2 = sum(alpha*gamma.*(q^2*(J11) + (1-q)^2*(J22)));
     obj3 = beta*sum(sum(D_F.*S));
     obj_current = obj1 + obj2 + obj3;
-   
+       obj(iter) = obj_current;
     
     if iter > 1
         if abs(obj_a - obj(iter - 1)) <  1e-5 && iter > 20
@@ -86,8 +86,6 @@ while iter < maxIter
         else
             obj(iter) = obj_current;
         end
-    else
-        obj(iter) = obj_current;
     end
     if mod(iter, 10) == 0 
         fprintf("The obj is %d.\n", obj(iter))
@@ -106,7 +104,7 @@ function [S, obj] = fun_alm(G, N, S_pre, cutflag)
     Q = ones(n, n);
 
     iter = 0;
-    mIter = 100;
+    mIter = 30;
     obj = 0;
     while iter < mIter 
         for i = 1:n
