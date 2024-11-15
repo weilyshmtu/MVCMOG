@@ -30,8 +30,6 @@ while iter < maxIter
     iter = iter + 1;
 
     % update Cv
-    
-    
     for v = 1 : n_views
         A = alpha*gamma(v)*(q^2*L_S + (1-q)^2*L_SS) - (1-p(v))^2*XXt{v} ;
         initC_v = C{v};
@@ -57,8 +55,9 @@ while iter < maxIter
         D_C_total = D_C_total + gamma(v)*D_C{v};
     end
     A = -alpha*(1-q)^2*A;
+    B = -alpha*q^2*D_C_total - beta*D_F;
     init_S = S;
-    [S, obj_t] = fun_alm(G, N, init_S, cut_flag);
+    [S, obj_t] = fun_alm(A, B, init_S, cut_flag);
     SS = S*S;
     L_SS = diag(sum(SS, 2)) - SS;
     
