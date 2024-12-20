@@ -50,9 +50,9 @@ for d_ind = 1:length(dataset)
     opts.n_views = n_views;
     opts.n_clusters = n_clusters;
     opts.neighbor_size =  k; 
-    opts.cut_flag = false;
+    opts.cut_flag = true;
     opts.obj_flag = true;
-    opts.results_required = true;
+    opts.results_required = false;
     opts.labels = labels;
     opts.order = 0;
 
