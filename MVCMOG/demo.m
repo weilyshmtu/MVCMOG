@@ -10,8 +10,8 @@ dataset = ["3Sources_1", "MSRC-v1","BBCsport", "WebKB" ,"COIL20","100Leaves","MN
 rng(7)
 
 
-alpha_set = [1, 2, 5, 10, 50, 100, 200, 500];
-beta_set =  [1, 2, 5, 10, 50, 100, 200, 500];
+ alpha_set = [0.1, 1, 5 ,10, 50, 100, 200, 250];
+ beta_set =  [0.1, 1, 5, 10, 50, 100, 200, 250];
 
 for d_ind = 1:length(dataset)
     data = dataset(d_ind);
@@ -44,29 +44,38 @@ for d_ind = 1:length(dataset)
         XXt{v} = X{v} * X{v}';
     end
 
+    k =  20;
     opts = [];
     opts.n_samples = n_samples;
     opts.n_views = n_views;
     opts.n_clusters = n_clusters;
-    opts.neighbor_size =  20; 
-    opts.cutflag = true;
-    [S] = initialize_S(X, n_samples, n_views, opts.neighbor_size);
-    S_init = 0.5*(S + S');
-    D_S = diag(sum(S, 2));
-    L_S = D_S - S;
+    opts.neighbor_size =  k; 
+    opts.cut_flag = false;
+    opts.obj_flag = true;
+    opts.results_required = true;
+    opts.labels = labels;
+    opts.order = 0;
+
+    [S_init, C_init] = initialize_S_C(X, n_samples, n_views, opts.neighbor_size);
+    S = 0.5*(S_init + S_init');
+    L_S = diag(sum(S, 2)) - S;
     [F_init, ~] = eigs(L_S, n_clusters, "smallestreal");
+   
+    opts.S_init = S_init;
+    opts.C_init = C_init;
+    opts.F_init = F_init;
    
     for alpha_ind = 1: length(alpha_set)
         for beta_ind = 1:length(beta_set)
-            alpha = 1 * alpha_set(9);
-            beta =  beta_set(5);
-            [S, C, p, q, obj] = mvcmog2(XXt, D_X, S_init, F_init, alpha, beta, opts);
+            alpha = alpha_set(alpha_ind);
+            beta =  beta_set(beta_ind);
+            [S, C, obj, results, residual_S] = mvcmog_ori(XXt, D_X, alpha, beta, opts);
             predy = SpectralClustering(S, n_clusters);
             curr_result = Clustering8Measure(labels, predy);
 
-            acc1(alpha_ind,beta_ind) = curr_result(1)
-            nmi1(alpha_ind,beta_ind) = curr_result(2)
-            ari1(alpha_ind,beta_ind) = curr_result(3)
+            acc1(alpha_ind,beta_ind) = curr_result(1);
+            nmi1(alpha_ind,beta_ind) = curr_result(2);
+            ari1(alpha_ind,beta_ind) = curr_result(3);
             fscore1(alpha_ind,beta_ind) = curr_result(4)
             purity1(alpha_ind,beta_ind) = curr_result(5);
             precision1(alpha_ind,beta_ind) = curr_result(6);
@@ -76,15 +85,11 @@ for d_ind = 1:length(dataset)
           
 
         end
-        % figure
-        % for b_i = 1 : length(beta_set)
-        %     subplot(1, length(beta_set), b_i)
-        %     plot( 1:length(obj_array{alpha_ind, b_i}), obj_array{alpha_ind, b_i})
-        % end
+       
     end
     cd("results")
-    if opts.cutflag
-        result_name = data + "_results_knn_newp_" + num2str(opts.neighbor_size);
+    if opts.cut_flag
+        result_name = data + "_results_knn_" + num2str(opts.neighbor_size);
     else  
         result_name = data + "_results_uncut";
     end
