@@ -1,4 +1,4 @@
-function [S] = initialize_S(X, n_samples, n_views, k)
+function [S] = initialize_S_C(X, n_samples, n_views, k)
 sumS = 0;
 for v= 1 : n_views
         W{v} = constructW_PKN(X{v}',k, 1);
